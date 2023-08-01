@@ -3,7 +3,6 @@ FROM nixpkgs-base
 RUN mkdir /dependencies
 
 COPY ./dependencies/nix-2.16.1-x86_64-linux /dependencies/nix
-COPY ./dependencies/nixpkgs /dependencies/nixpkgs
 
 RUN mkdir -p /nix /etc/nix \
  && chmod a+rwx /nix \
@@ -12,8 +11,12 @@ RUN mkdir -p /nix /etc/nix \
 RUN adduser nix --home /home/nix --disabled-password --gecos "" --shell /bin/bash \
  && usermod -aG sudo nix
 
-COPY ./dependencies/nix.conf /nix/nix.conf
-RUN chown nix /nix/nix.conf
+# Don't bother asking for sudo.
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+COPY --chown=nix:nix ./dependencies/nixpkgs /dependencies/nixpkgs
+COPY --chown=nix:nix ./dependencies/nix.conf /nix/nix.conf
+COPY --chown=nix:nix ./dependencies/flake-registry.json /nix/flake-registry.json
 ENV NIX_CONF_DIR /nix
 
 USER nix

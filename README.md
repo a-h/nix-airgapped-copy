@@ -37,13 +37,6 @@ docker build --network none -t nixpkgs-offline -f Dockerfile.offline .
 Requires: create-docker-nixpkgs-offline
 
 ```
-docker run -it --rm --network none -v /nix/store:/remotestore:Z nixpkgs-offline
+docker run -it --rm --network none -v /nix/store:/home/nix/remotestore nixpkgs-offline
 ```
 
-## Documentation
-
-Setup nixpkgs to point at a local copy of the Nix repo from Github.
-
-```
-nix registry add nixpkgs /dependencies/nixpkgs/
-```
