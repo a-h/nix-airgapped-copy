@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM nixpkgs-base
 
 RUN mkdir /dependencies
 
@@ -9,7 +9,8 @@ RUN mkdir -p /nix /etc/nix \
  && chmod a+rwx /nix \
  && mkdir -p ~/.config/nixpkgs
 
-RUN adduser nix --home /home/nix --disabled-password --gecos "" --shell /bin/bash
+RUN adduser nix --home /home/nix --disabled-password --gecos "" --shell /bin/bash \
+ && usermod -aG sudo nix
 
 COPY ./dependencies/nix.conf /nix/nix.conf
 RUN chown nix /nix/nix.conf
@@ -19,7 +20,7 @@ USER nix
 ENV USER nix
 WORKDIR /home/nix
 
-COPY ./dependencies/nixpkgs-config.nix /home/nix/.config/nixpkgs/config.nix
+COPY --chown=nix:nix ./dependencies/nixpkgs-config.nix /home/nix/.config/nixpkgs/config.nix
 
 RUN touch .bash_profile \
  && /dependencies/nix/install --no-daemon

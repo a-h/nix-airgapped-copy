@@ -18,17 +18,32 @@ git clone --branch 23.05 --depth 1 git@github.com:NixOS/nixpkgs.git
 tar --overwrite -xf nixpkgs.tar.xz
 ```
 
-### create-docker
+### create-docker-nixpkgs-offline-base
 
 ```
-docker build --network none -t nixpkgs-offline .
+docker build -t nixpkgs-base -f Dockerfile.base .
+```
+
+### create-docker-nixpkgs-offline
+
+Requires: create-docker-nixpkgs-offline-base
+
+```
+docker build --network none -t nixpkgs-offline -f Dockerfile.offline .
 ```
 
 ### run
 
-Requires: create-docker
+Requires: create-docker-nixpkgs-offline
 
 ```
-docker run --privileged -it --rm --workdir=/dependencies --network none -v /nix/store:/remotestore:Z nixpkgs-offline
+docker run -it --rm --network none -v /nix/store:/remotestore:Z nixpkgs-offline
 ```
 
+## Documentation
+
+Setup nixpkgs to point at a local copy of the Nix repo from Github.
+
+```
+nix registry add nixpkgs /dependencies/nixpkgs/
+```
