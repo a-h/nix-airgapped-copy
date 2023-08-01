@@ -36,7 +36,25 @@ docker build --network none -t nixpkgs-offline -f Dockerfile.offline .
 
 Requires: create-docker-nixpkgs-offline
 
+On any machine, you can run `nix copy github:NixOS/nixpkgs/23.05#hello --to file:///home/adrian-hesketh/Downloads/nixpkgs/export` to create an export.
+
+Then you can import it with `nix copy --all --from file:///home/nix/export`
+
+Once that's done, you can run the program with `nix run nixpkgs#hello`.
+
 ```
-docker run -it --rm --network none -v /nix/store:/home/nix/remotestore nixpkgs-offline
+docker run -it --rm --network none -v `pwd`/export:/home/nix/export nixpkgs-offline
+```
+
+### export
+
+Requires: create-docker-nixpkgs-offline
+
+If you don't have Nix installed, you can export a Nix Flake from a machine with Internet access using `nix copy --to file:///home/nix/export nixpkgs#hello`
+
+The machine will download everything that's required.
+
+```
+docker run -it --rm -v `pwd`/export:/home/nix/export nixpkgs-offline
 ```
 
