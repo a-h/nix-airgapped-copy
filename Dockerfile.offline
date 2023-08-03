@@ -2,8 +2,6 @@ FROM nixpkgs-base
 
 RUN mkdir /dependencies
 
-COPY ./dependencies/nix-2.16.1-x86_64-linux /dependencies/nix
-
 RUN mkdir -p /nix /etc/nix \
  && chmod a+rwx /nix \
  && mkdir -p ~/.config/nixpkgs
@@ -14,16 +12,22 @@ RUN adduser nix --home /home/nix --disabled-password --gecos "" --shell /bin/bas
 # Don't bother asking for sudo.
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-COPY --chown=nix:nix ./dependencies/nixpkgs /dependencies/nixpkgs
+COPY --chown=nix:nix ./dependencies/nix-2.16.1-x86_64-linux /dependencies/nix
+COPY --chown=nix:nix ./dependencies/nixpkgs-config.nix /home/nix/.config/nixpkgs/config.nix
 COPY --chown=nix:nix ./dependencies/nix.conf /nix/nix.conf
 COPY --chown=nix:nix ./dependencies/flake-registry.json /nix/flake-registry.json
+
+# Nixpkgs versions.
+COPY --chown=nix:nix ./dependencies/nixpkgs-23.05 /dependencies/nixpkgs-23.05
+COPY --chown=nix:nix ./dependencies/nixpkgs-f9c5d92b43cc0c496f35f073386300e564e9939a /dependencies/nixpkgs-f9c5d92b43cc0c496f35f073386300e564e9939a
+
 ENV NIX_CONF_DIR /nix
+
+RUN chown -R nix:nix /home/nix
 
 USER nix
 ENV USER nix
 WORKDIR /home/nix
-
-COPY --chown=nix:nix ./dependencies/nixpkgs-config.nix /home/nix/.config/nixpkgs/config.nix
 
 RUN touch .bash_profile \
  && /dependencies/nix/install --no-daemon
