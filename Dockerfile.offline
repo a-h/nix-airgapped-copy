@@ -31,4 +31,6 @@ WORKDIR /home/nix
 RUN touch .bash_profile \
  && /dependencies/nix/install --no-daemon
 
+RUN /bin/bash -c ". ~/.bash_profile && nix registry pin nixpkgs"
+
 CMD /bin/bash -l
