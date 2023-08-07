@@ -36,7 +36,7 @@ docker build --network none -t nixpkgs-offline -f Dockerfile.offline .
 
 Requires: create-docker-nixpkgs-offline
 
-On any machine, you can run `nix copy github:NixOS/nixpkgs/23.05#hello --to file:///home/adrian-hesketh/Downloads/nixpkgs/export` to create an export.
+On any machine, you can run `nix copy github:NixOS/nixpkgs/23.05#hello --to file:///home/adrian-hesketh/github.com/a-h/nix-airgapped-copy/export` to create an export.
 
 Then you can import it with `nix copy --all --from file:///home/nix/export`
 
@@ -58,15 +58,20 @@ The machine will download everything that's required.
 docker run -it --rm -v `pwd`/export:/home/nix/export nixpkgs-offline
 ```
 
+### export-custom-flake-local
+
+Dir: ./example-flake
+
+```
+nix copy .# --derivation --to file:///home/adrian-hesketh/github.com/a-h/nix-airgapped-copy/export
+nix copy .# --to file:///home/adrian-hesketh/github.com/a-h/nix-airgapped-copy/export
+```
+
 ### export-custom-flake
 
 Requires: create-docker-nixpkgs-offline
 
-Here we can export the flake by `cd /github-runner` and `nix copy --all --to file:///home/nix/export`.
-
-It's possible to override the flake inputs and use local disk paths.
-
-The build closure can be copied (as per https://determinate.systems/posts/moving-stuff-around-with-nix) - `nix copy --derivation --to file:///home/nix/export`
+Here we can export the flake by `cd ./example-flake` and doing two `nix copy` operations. One to copy the derivation, one to copy the binary outputs, see `export-custom-flake-local`.
 
 ```
 docker run -it --rm -v `pwd`/export:/home/nix/export -v `pwd`/example-flake/:/example-flake nixpkgs-offline
@@ -76,13 +81,9 @@ docker run -it --rm -v `pwd`/export:/home/nix/export -v `pwd`/example-flake/:/ex
 
 Requires: create-docker-nixpkgs-offline
 
-Here we can import the flake with `nix copy --all --from file:///home/nix/export --no-check-sigs`.
+Here we can import the flake with `nix copy --all --from file:///home/nix/export --no-check-sigs --verbose`.
 
-If the package is called `example-pipeline-github-runner` then you can find the packages that belong to it by querying the nix store - `ls /nix/store | grep github-runner`.
-
-`example-pipeline-github-runner` installs things that are from nixpkgs - you can run them air-gapped with `nix run nixpkgs#jq` and it won't try to download them because they're already in the store
-
-You can also install all of the outputs of the flake, after the copy operation, run `nix profile install <output_of_store_location>`.
+Then, we can build or run the custom flake by `cd /example-flake` and `nix build --override-input nixpkgs path:///dependencies/nixpkgs-23.05`.
 
 ```
 docker run -it --rm --network none -v `pwd`/export:/home/nix/export -v `pwd`/example-flake/:/example-flake nixpkgs-offline
