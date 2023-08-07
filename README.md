@@ -16,8 +16,6 @@ Dir: dependencies
 ```
 wget https://github.com/NixOS/nixpkgs/archive/23.05.tar.gz
 tar xf 23.05.tar.gz
-wget https://github.com/NixOS/nixpkgs/archive/f9c5d92b43cc0c496f35f073386300e564e9939a.tar.gz
-tar xf f9c5d92b43cc0c496f35f073386300e564e9939a.tar.gz
 ```
 
 ### create-docker-nixpkgs-offline-base
@@ -71,7 +69,7 @@ It's possible to override the flake inputs and use local disk paths.
 The build closure can be copied (as per https://determinate.systems/posts/moving-stuff-around-with-nix) - `nix copy --derivation --to file:///home/nix/export`
 
 ```
-docker run -it --rm -v `pwd`/export:/home/nix/export -v /home/adrian-hesketh/github.com/example-pipeline/github-runner/:/github-runner nixpkgs-offline
+docker run -it --rm -v `pwd`/export:/home/nix/export -v `pwd`/example-flake/:/example-flake nixpkgs-offline
 ```
 
 ### run-custom-flake
@@ -87,5 +85,5 @@ If the package is called `example-pipeline-github-runner` then you can find the 
 You can also install all of the outputs of the flake, after the copy operation, run `nix profile install <output_of_store_location>`.
 
 ```
-docker run -it --rm --network none -v `pwd`/export:/home/nix/export -v /home/adrian-hesketh/github.com/example-pipeline/github-runner/:/github-runner nixpkgs-offline
+docker run -it --rm --network none -v `pwd`/export:/home/nix/export -v `pwd`/example-flake/:/example-flake nixpkgs-offline
 ```

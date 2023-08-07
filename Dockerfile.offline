@@ -19,7 +19,6 @@ COPY --chown=nix:nix ./dependencies/flake-registry.json /nix/flake-registry.json
 
 # Nixpkgs versions.
 COPY --chown=nix:nix ./dependencies/nixpkgs-23.05 /dependencies/nixpkgs-23.05
-COPY --chown=nix:nix ./dependencies/nixpkgs-f9c5d92b43cc0c496f35f073386300e564e9939a /dependencies/nixpkgs-f9c5d92b43cc0c496f35f073386300e564e9939a
 
 ENV NIX_CONF_DIR /nix
 

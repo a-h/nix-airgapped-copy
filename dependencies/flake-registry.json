@@ -9,16 +9,6 @@
         "path": "/dependencies/nixpkgs-23.05",
         "type": "path"
       }
-    },
-    {
-      "from": {
-        "id": "nixpkgs-ghrunner",
-        "type": "indirect"
-      },
-      "to": {
-        "path": "/dependencies/nixpkgs-f9c5d92b43cc0c496f35f073386300e564e9939a",
-        "type": "path"
-      }
     }
   ],
   "version": 2
