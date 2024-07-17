@@ -1,90 +1,38 @@
 ## Tasks
 
-### download-installer
+### docker-build
 
-Dir: dependencies
-
-```
-wget https://releases.nixos.org/nix/nix-2.16.1/nix-2.16.1-x86_64-linux.tar.xz
-tar --overwrite -xf nix-2.16.1-x86_64-linux.tar.xz
+```bash
+docker build -t nixpkgs-offline .
 ```
 
-### download-nixpkgs
+### flake-export
 
-Dir: dependencies
+Run this command to export your flake's inputs (`nix flake archive`), dev shells (`nix copy --derivation`) and the package outputs (`nix copy`).
 
-```
-wget https://github.com/NixOS/nixpkgs/archive/23.05.tar.gz
-tar xf 23.05.tar.gz
-```
-
-### create-docker-nixpkgs-offline-base
-
-```
-docker build -t nixpkgs-base -f Dockerfile.base .
-```
-
-### create-docker-nixpkgs-offline
-
-Requires: create-docker-nixpkgs-offline-base
-
-```
-docker build --network none -t nixpkgs-offline -f Dockerfile.offline .
-```
-
-### run
-
-Requires: create-docker-nixpkgs-offline
-
-On any machine, you can run `nix copy github:NixOS/nixpkgs/23.05#hello --to file:///home/adrian-hesketh/github.com/a-h/nix-airgapped-copy/export` to create an export.
-
-Then you can import it with `nix copy --all --from file:///home/nix/export`
-
-Once that's done, you can run the program with `nix run nixpkgs#hello`.
-
-```
-docker run -it --rm --network none -v `pwd`/export:/home/nix/export nixpkgs-offline
-```
-
-### export
-
-Requires: create-docker-nixpkgs-offline
-
-If you don't have Nix installed, you can export a Nix Flake from a machine with Internet access using `nix copy --to file:///home/nix/export nixpkgs#hello`
-
-The machine will download everything that's required.
-
-```
-docker run -it --rm -v `pwd`/export:/home/nix/export nixpkgs-offline
-```
-
-### export-custom-flake-local
+The path output on a Linux x86-64 machine is: /nix/store/gd59r1b49isi9pxi5q5hiy67bvk385h8-hello-nix-build
 
 Dir: ./example-flake
 
-```
-nix copy .# --derivation --to file:///home/adrian-hesketh/github.com/a-h/nix-airgapped-copy/export
-nix copy .# --to file:///home/adrian-hesketh/github.com/a-h/nix-airgapped-copy/export
-```
-
-### export-custom-flake
-
-Requires: create-docker-nixpkgs-offline
-
-Here we can export the flake by `cd ./example-flake` and doing two `nix copy` operations. One to copy the derivation, one to copy the binary outputs, see `export-custom-flake-local`.
-
-```
-docker run -it --rm -v `pwd`/export:/home/nix/export -v `pwd`/example-flake/:/example-flake nixpkgs-offline
+```bash
+nix flake archive .# --to file://$PWD/export/
+nix copy .# --derivation --to file://$PWD/export
+nix copy .# --to file://$PWD/export
+echo "Note the path."
+nix path-info ".#"
 ```
 
-### run-custom-flake
+### docker-run
 
-Requires: create-docker-nixpkgs-offline
+Inside the Docker container, we have no Internet connection, but we have mounted the export from the non-airgapped machine.
 
-Here we can import the flake with `nix copy --all --from file:///home/nix/export --no-check-sigs --verbose`.
+First, we need to import all the Nix store paths with:
 
-Then, we can build or run the custom flake by `cd /example-flake` and `nix build --override-input nixpkgs path:///dependencies/nixpkgs-23.05`.
+`nix copy --all --from file:///example-flake/export --no-check-sigs --verbose`
 
+Then, we can build or run the custom flake by `cd /example-flake` and `nix build`.
+
+```bash
+docker run -it --rm --network none -v $PWD/example-flake:/example-flake nixpkgs-offline
 ```
-docker run -it --rm --network none -v `pwd`/export:/home/nix/export -v `pwd`/example-flake/:/example-flake nixpkgs-offline
-```
+
