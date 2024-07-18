@@ -8,9 +8,7 @@ docker build -t nixpkgs-offline .
 
 ### flake-export
 
-Run this command to export your flake's inputs (`nix flake archive`), dev shells (`nix copy --derivation`) and the package outputs (`nix copy`).
-
-The path output on a Linux x86-64 machine is: /nix/store/r65a96c8qnj386n89n92v8p4bglszha1-app
+Run this command to export your flake's inputs, dev shell, and package outputs.
 
 ```bash
 docker run --rm -v $PWD:/code:Z -w '/code' --entrypoint="/code/export.sh" nixpkgs-offline
@@ -18,13 +16,17 @@ docker run --rm -v $PWD:/code:Z -w '/code' --entrypoint="/code/export.sh" nixpkg
 
 ### flake-import-build
 
+The import script demonstrates how to import the flake's inputs and build the flake.
+
 ```bash
 docker run --network none --rm -v $PWD:/code:Z -w '/code' --entrypoint="/code/import.sh" nixpkgs-offline
 ```
 
 ### docker-run
 
-Inside the Docker container, we have no Internet connection, but we have mounted the export from the non-airgapped machine.
+To run through the steps manually, we can use the following commands.
+
+Inside the Docker container, we have no Internet connection, but we have mounted the export from the non-airgapped machine to `/code/nix-export`.
 
 First, we need to import all the Nix store paths with:
 
